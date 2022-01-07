@@ -157,6 +157,7 @@ namespace openshot {
 		openshot::AnchorType anchor;     ///< The anchor determines what parent a clip should snap to
 		openshot::FrameDisplayType display; ///< The format to display the frame number (if any)
 		openshot::VolumeMixType mixing;  ///< What strategy should be followed when mixing audio with other clips
+		openshot::BlendType blend;  ///< What strategy should be followed when mixing video with other clips
 
 		#ifdef USE_OPENCV
 			bool COMPILED_WITH_CV = true;

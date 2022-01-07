@@ -45,6 +45,7 @@ void Clip::init_settings()
 	anchor = ANCHOR_CANVAS;
 	display = FRAME_DISPLAY_NONE;
 	mixing = VOLUME_MIX_NONE;
+	blend = BLEND_SOURCEOVER;
 	waveform = false;
 	previous_properties = "";
 	parentObjectId = "";
@@ -761,6 +762,7 @@ std::string Clip::PropertiesJSON(int64_t requested_frame) const {
 	root["scale"] = add_property_json("Scale", scale, "int", "", NULL, 0, 3, false, requested_frame);
 	root["display"] = add_property_json("Frame Number", display, "int", "", NULL, 0, 3, false, requested_frame);
 	root["mixing"] = add_property_json("Volume Mixing", mixing, "int", "", NULL, 0, 2, false, requested_frame);
+	root["blend"] = add_property_json("Blend Mode", blend, "int", "", NULL, 0, 23, false, requested_frame);
 	root["waveform"] = add_property_json("Waveform", waveform, "int", "", NULL, 0, 1, false, requested_frame);
 	if (!parentObjectId.empty()) {
 		root["parentObjectId"] = add_property_json("Parent", 0.0, "string", parentObjectId, NULL, -1, -1, false, requested_frame);
@@ -794,6 +796,32 @@ std::string Clip::PropertiesJSON(int64_t requested_frame) const {
 	root["mixing"]["choices"].append(add_property_choice_json("None", VOLUME_MIX_NONE, mixing));
 	root["mixing"]["choices"].append(add_property_choice_json("Average", VOLUME_MIX_AVERAGE, mixing));
 	root["mixing"]["choices"].append(add_property_choice_json("Reduce", VOLUME_MIX_REDUCE, mixing));
+
+	// Add video blend choices (dropdown style)
+	root["blend"]["choices"].append(add_property_choice_json("Source Over", BLEND_SOURCEOVER, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Destination Over", BLEND_DESTINATIONOVER, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Clear", BLEND_CLEAR, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Source", BLEND_SOURCE, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Destination", BLEND_DESTINATION, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Source In", BLEND_SOURCEIN, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Destination In", BLEND_DESTINATIONIN, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Source Out", BLEND_SOURCEOUT, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Destination Out", BLEND_DESTINATIONOUT, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Source Atop", BLEND_SOURCEATOP, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Destination Atop", BLEND_DESTINATIONATOP, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Xor", BLEND_XOR, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Plus", BLEND_PLUS, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Multiply", BLEND_MULTIPLY, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Screen", BLEND_SCREEN, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Overlay", BLEND_OVERLAY, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Darken", BLEND_DARKEN, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Lighten", BLEND_LIGHTEN, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Color Dodge", BLEND_COLORDODGE, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Color Burn", BLEND_COLORBURN, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Hard Light", BLEND_HARDLIGHT, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Soft Light", BLEND_SOFTLIGHT, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Difference", BLEND_DIFFERENCE, blend));
+	root["blend"]["choices"].append(add_property_choice_json("Exclusion", BLEND_EXCLUSION, blend));
 
 	// Add waveform choices (dropdown style)
 	root["waveform"]["choices"].append(add_property_choice_json("Yes", true, waveform));
@@ -907,6 +935,7 @@ Json::Value Clip::JsonValue() const {
 	root["anchor"] = anchor;
 	root["display"] = display;
 	root["mixing"] = mixing;
+	root["blend"] = blend;
 	root["waveform"] = waveform;
 	root["scale_x"] = scale_x.JsonValue();
 	root["scale_y"] = scale_y.JsonValue();
@@ -995,6 +1024,8 @@ void Clip::SetJsonValue(const Json::Value root) {
 		display = (FrameDisplayType) root["display"].asInt();
 	if (!root["mixing"].isNull())
 		mixing = (VolumeMixType) root["mixing"].asInt();
+	if (!root["blend"].isNull())
+		blend = (BlendType) root["blend"].asInt();
 	if (!root["waveform"].isNull())
 		waveform = root["waveform"].asBool();
 	if (!root["scale_x"].isNull())
@@ -1269,7 +1300,7 @@ void Clip::apply_keyframes(std::shared_ptr<Frame> frame, std::shared_ptr<QImage>
     painter.setTransform(transform);
 
     // Composite a new layer onto the image
-    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    painter.setCompositionMode((QPainter::CompositionMode) blend);
     painter.drawImage(0, 0, *source_image);
 
     if (timeline) {
