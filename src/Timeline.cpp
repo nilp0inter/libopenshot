@@ -813,7 +813,7 @@ std::shared_ptr<Frame> Timeline::GetFrame(int64_t requested_frame)
         int samples_in_frame = Frame::GetSamplesPerFrame(requested_frame, info.fps, info.sample_rate, info.channels);
 
         // Create blank frame (which will become the requested frame)
-        std::shared_ptr<Frame> new_frame(std::make_shared<Frame>(requested_frame, preview_width, preview_height, "#000000", samples_in_frame, info.channels));
+        std::shared_ptr<Frame> new_frame(std::make_shared<Frame>(requested_frame, preview_width, preview_height, "#00000000", samples_in_frame, info.channels));
         new_frame->AddAudioSilence(samples_in_frame);
         new_frame->SampleRate(info.sample_rate);
         new_frame->ChannelsLayout(info.channel_layout);
