@@ -1289,6 +1289,11 @@ AVStream *FFmpegWriter::add_video_stream() {
 		}
 	}
 
+	// hacky hack hack
+	if (c->codec_id == AV_CODEC_ID_PRORES) {
+		c->pix_fmt = AV_PIX_FMT_YUVA444P10;
+	}
+
 	AV_COPY_PARAMS_FROM_CONTEXT(st, c);
 #if (LIBAVFORMAT_VERSION_MAJOR < 58)
 	// FFmpeg < 4.0
